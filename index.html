@@ -35,7 +35,7 @@
         <script type="text/javascript">
           var new_dict = []; 
           var sstring = '';
-        function get_yelp(term,loca){
+        function get_yelp(term,loca,search_term){
             var auth = {
                 consumerKey: "6bYY1U8dhgFt17noBW5NXQ",
                 consumerSecret: "LXEV5iVj-Azb12ub7G8kaFWpK5Q",
@@ -74,7 +74,6 @@
         var total_people = 0;
         var my_dict = [];
         new_dict = [];
-        sstring = '';
         $.ajax({
                'url': message.action,
                'data': parameterMap,
@@ -98,9 +97,11 @@
                             return -(a.key - b.key);
                             });
                new_dict = my_dict;
-               for (i = 0; i < 5; i++) {
+               sstring += search_term + "<br>"
+               for (i = 0; i < 4; i++) {
                   sstring = sstring+(new_dict[i].value + " " + "<br>");
                }
+               sstring += "<br>";
                }
         });
         }
@@ -137,16 +138,19 @@ function initialize() {
           map: map,
           });
         //new_dict.length(0);
+        sstring = '';
         var l1 = location.lng();
         var l2 = location.lat();
-        var ss = get_yelp('food',l2+','+l1);
+        get_yelp('hotels',l2+','+l1,'HOTELS');
+        setTimeout(function(){get_yelp('food',l2+','+l1,'FOOD')},1000);
+        setTimeout(function(){get_yelp('attractions',l2+','+l1,'ATTRACTIONS')},2000);
         setTimeout(function(){
         var infowindow = new google.maps.InfoWindow({
           content: ' '+ sstring
           //content: 'Latitude: '  + new_dict[0].value + "  -- " + l2 + " " + l1
         });
         infowindow.open(map,marker);
-        },2000);
+        },3000);
       }
 
 function calcRoute() {
