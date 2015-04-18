@@ -89,7 +89,7 @@
                }
                sstring += search_term + "<br>"
                for (i = 0; i < 5; i++) {
-               sstring = sstring+(obj.businesses[i].name + " URL: " + '<a href='+obj.businesses[i].url+'>'+obj.businesses[i].url+'</a>' +"<br>");
+               sstring = sstring+('<a href='+obj.businesses[i].url+'>'+obj.businesses[i].name+'</a>' +"<br>");
                /*my_dict.push({
                             key: (obj.businesses[i].review_count * obj.businesses[i].rating) / total_people,
                             value: (obj.businesses[i].name + " URL: " + obj.businesses[i].url)
