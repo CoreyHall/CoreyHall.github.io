@@ -79,6 +79,7 @@
                'data': parameterMap,
                'cache': true,
                'dataType': 'jsonp',
+               'sort':'2',
                'jsonpCallback': 'cb',
                'success': function(data, textStats, XMLHttpRequest) {
                var output = JSON.stringify(data);
@@ -86,22 +87,24 @@
                for (i = 0; i < 20; i++) {
                total_people = total_people + obj.businesses[i].review_count;
                }
-               for (i = 0; i < 20; i++) {
-               my_dict.push({
+               sstring += search_term + "<br>"
+               for (i = 0; i < 5; i++) {
+               sstring = sstring+(obj.businesses[i].name + " URL: " + '<a href='+obj.businesses[i].url+'>'+obj.businesses[i].url+'</a>' +"<br>");
+               /*my_dict.push({
                             key: (obj.businesses[i].review_count * obj.businesses[i].rating) / total_people,
                             value: (obj.businesses[i].name + " URL: " + obj.businesses[i].url)
                             });
-               //$("body").append(obj.businesses[i].name + " URL: " + obj.businesses[i].url + " Rating: " + obj.businesses[i].rating + "<br>");
+               //$("body").append(obj.businesses[i].name + " URL: " + obj.businesses[i].url + " Rating: " + obj.businesses[i].rating + "<br>");*/
                }
-               my_dict.sort(function(a, b) {
+               sstring += "<br>";
+              /* my_dict.sort(function(a, b) {
                             return -(a.key - b.key);
                             });
                new_dict = my_dict;
                sstring += search_term + "<br>"
                for (i = 0; i < 4; i++) {
                   sstring = sstring+(new_dict[i].value + " " + "<br>");
-               }
-               sstring += "<br>";
+               }*/
                }
         });
         }
