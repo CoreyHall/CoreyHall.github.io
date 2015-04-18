@@ -8,18 +8,130 @@
     <title>Plan Me A Road Trip</title>
     <script src="http://maps.google.com/maps/api/js?sensor=true"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-    <script>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+        <script type="text/javascript" src="http://oauth.googlecode.com/svn/code/javascript/oauth.js"></script>
+        <script type="text/javascript" src="http://oauth.googlecode.com/svn/code/javascript/sha1.js"></script>
+        <script type="text/javascript" src="https://raw.github.com/padolsey/prettyPrint.js/master/prettyprint.js"></script>
+        <script type="text/javascript">
+          var new_dict = []; 
+          var sstring = '';
+        function get_yelp(term,loca){
+            var auth = {
+                consumerKey: "6bYY1U8dhgFt17noBW5NXQ",
+                consumerSecret: "LXEV5iVj-Azb12ub7G8kaFWpK5Q",
+                accessToken: "tX6UzxaDaewFyriSB902mFFs4EDUF6Lx",
+                accessTokenSecret: "YpjvnyGiU5JRb6RaPrl0LmmVTjg",
+                serviceProvider: {
+                    signatureMethod: "HMAC-SHA1"
+                }
+            };
+        var terms = term;
+        var near = loca;
+        var accessor = {
+            consumerSecret: auth.consumerSecret,
+            tokenSecret: auth.accessTokenSecret
+        };
+        parameters = [];
+        parameters.push(['term', terms]);
+        parameters.push(['ll', near]);
+        parameters.push(['callback', 'cb']);
+        parameters.push(['oauth_consumer_key', auth.consumerKey]);
+        parameters.push(['oauth_consumer_secret', auth.consumerSecret]);
+        parameters.push(['oauth_token',
+                         auth.accessToken
+                         ]);
+                         parameters.push(['oauth_signature_method', 'HMAC-SHA1']);
+                         var message = {
+                             'action': 'http://api.yelp.com/v2/search',
+                             'method': 'GET',
+                             'parameters': parameters
+                         };
+        OAuth.setTimestampAndNonce(message);
+        OAuth.SignatureMethod.sign(message, accessor);
+        var parameterMap = OAuth.getParameterMap(message.parameters);
+        parameterMap.oauth_signature = OAuth.percentEncode(parameterMap.oauth_signature)
+        console.log(parameterMap);
+        var total_people = 0;
+        var my_dict = [];
+        new_dict = [];
+        sstring = '';
+        $.ajax({
+               'url': message.action,
+               'data': parameterMap,
+               'cache': true,
+               'dataType': 'jsonp',
+               'jsonpCallback': 'cb',
+               'success': function(data, textStats, XMLHttpRequest) {
+               var output = JSON.stringify(data);
+               obj = JSON.parse(output);
+               for (i = 0; i < 20; i++) {
+               total_people = total_people + obj.businesses[i].review_count;
+               }
+               for (i = 0; i < 20; i++) {
+               my_dict.push({
+                            key: (obj.businesses[i].review_count * obj.businesses[i].rating) / total_people,
+                            value: (obj.businesses[i].name + " URL: " + obj.businesses[i].url)
+                            });
+               //$("body").append(obj.businesses[i].name + " URL: " + obj.businesses[i].url + " Rating: " + obj.businesses[i].rating + "<br>");
+               }
+               my_dict.sort(function(a, b) {
+                            return -(a.key - b.key);
+                            });
+               new_dict = my_dict;
+               for (i = 0; i < 5; i++) {
+                  sstring = sstring+(new_dict[i].value + " " + "<br>");
+               }
+               }
+        });
+        }
+      var map;
+      //var myCenter=new google.maps.LatLng(51.508742,-0.120850);
+      var myCenter=new google.maps.LatLng(30.61, -96.31);
+      var ss = "";
+      function initialize()
+      {
+        var mapProp = {
+          center:myCenter,
+          zoom:5,
+          mapTypeId:google.maps.MapTypeId.ROADMAP
+        };
+
+        map = new google.maps.Map(document.getElementById("map-canvas"),mapProp);
+
+        google.maps.event.addListener(map, 'click', function(event) {
+          placeMarker(event.latLng);
+        });
+      }
+
+      function placeMarker(location) {
+        var marker = new google.maps.Marker({
+          position: location,
+          map: map,
+          });
+        //new_dict.length(0);
+        var l1 = location.lng();
+        var l2 = location.lat();
+        var ss = get_yelp('food',l2+','+l1);
+        setTimeout(function(){
+        var infowindow = new google.maps.InfoWindow({
+          content: ' '+ sstring
+          //content: 'Latitude: '  + new_dict[0].value + "  -- " + l2 + " " + l1
+        });
+        infowindow.open(map,marker);
+        },2000);
+      }
+
+      google.maps.event.addDomListener(window, 'load', initialize);
       function calculateRoute(from, to) {
         // Center initialized to College Station, TX
-        var myOptions = {
+      /*  var myOptions = {
           zoom: 10,
           center: new google.maps.LatLng(30.61, -96.31),
           mapTypeId: google.maps.MapTypeId.ROADMAP
-        };
-        var waypts = [];
+        };*/
         // Draw the map
-        var mapObject = new google.maps.Map(document.getElementById("map-canvas"), myOptions);
- 
+        //var mapObject = new google.maps.Map(document.getElementById("map-canvas"), myOptions);
+        var mapObject = map;
         var directionsService = new google.maps.DirectionsService();
         var directionsRequest = {
           origin: from,
@@ -51,7 +163,7 @@
           return;
         }
  
-        $("#from-link, #to-link, #waypoints-link").click(function(event) {
+        $("#from-link, #to-link").click(function(event) {
           event.preventDefault();
           var addressId = this.id.substring(0, this.id.indexOf("-"));
  
@@ -81,12 +193,13 @@
           calculateRoute($("#from").val(), $("#to").val());
         });
       });
+
+
     </script>
   </head>
   <body>
-    <h1>Plan Your Road Trip</h1>
+    <h1>Calculate your route</h1>
     <form id="calculate-route" name="calculate-route" action="#" method="get">
-      
       <label for="from">From:</label>
       <input type="text" id="from" name="from" required="required" placeholder="An address" size="30" />
       <a id="from-link" href="#">Get my position</a>
@@ -95,11 +208,6 @@
       <label for="to">To:</label>
       <input type="text" id="to" name="to" required="required" placeholder="Another address" size="30" />
       <a id="to-link" href="#">Get my position</a>
-      <br />
-      
-      <label for="waypoints">To:</label>
-      <input type="text" id="waypoints" name="waypoints" required="required" placeholder="Another address" size="30" />
-      <a id="waypoints-link" href="#">Get my position</a>
       <br />
  
       <input type="submit" />
