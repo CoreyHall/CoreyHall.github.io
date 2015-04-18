@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>PlanMeARoadTrip!</title>
+    <style type="text/css">
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+      }
+      #directionsPanel
+        {
+          height:350px;
+          width: 100%;
+          overflow:auto;
+          background:#fff;
+        }
+      #top {
+          position: fixed;
+          top: 0;
+          left: 0;
+          z-index: 999;
+      }
+      
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+    <script>
+
+var rendererOptions = {
+  draggable: true
+};
+var directionsDisplay = new google.maps.DirectionsRenderer(rendererOptions);;
+var directionsService = new google.maps.DirectionsService();
+var map;
+
+function initialize() {
+  directionsDisplay = new google.maps.DirectionsRenderer();
+  var cstat = new google.maps.LatLng(30.6014, -96.3144);
+  var mapOptions = {
+    zoom: 6,
+    center: cstat
+  }
+  map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+  directionsDisplay.setMap(map);
+  directionsDisplay.setPanel(document.getElementById('directionsPanel'));
+  
+  google.maps.event.addListener(directionsDisplay, 'directions_changed', function() {
+    computeTotalDistance(directionsDisplay.getDirections());
+  });
+
+  calcRoute();
+}
+
+function calcRoute() {
+  
+  var waypts = [];
+  
+  var wp = "";
+    $("#myTable tr").each(function () {
+        if( $(this).find('input[name="way"]').length > 0 ) {
+            wp = $(this).find('input[name="way"]').val();
+            if(wp != ""){
+                waypts.push({
+                  location:wp,
+                  stopover:true});
+            }
+        }
+    });
+  
+//  var tblrows = table.rows;
+//    for(var i=0; i<tblrows.length; i++){
+//        var tblcells = tblrows[i].cells;
+//        alert(tblcells[0].innerHTML.value);
+//    }
+
+    
+//  var checkboxArray = document.getElementById('waypoints');
+//  for (var i = 0; i < checkboxArray.length; i++) {
+//    if (checkboxArray.options[i].selected == true) {
+//      waypts.push({
+//          location:checkboxArray[i].value,
+//          stopover:true});
+//    }
+//  }
+
+  
+  var start = document.getElementById('start').value;
+  var end = document.getElementById('end').value;
+  
+  var request = {
+      origin: start,
+      destination: end,
+      waypoints: waypts,
+      optimizeWaypoints: true,
+      travelMode: google.maps.TravelMode.DRIVING
+  };
+  directionsService.route(request, function(response, status) {
+    if (status == google.maps.DirectionsStatus.OK) {
+      directionsDisplay.setDirections(response);
+    }
+  });
+}
+
+function computeTotalDistance(result) {
+  var total = 0;
+  var myroute = result.routes[0];
+  for (var i = 0; i < myroute.legs.length; i++) {
+    total += myroute.legs[i].distance.value;
+  }
+  total = total / 1000.0;
+  document.getElementById('total').innerHTML = total + ' km';
+}
+
+var index = 1;
+function insertRow(){
+    var table=document.getElementById("myTable");
+    var row=table.insertRow(table.rows.length);
+    var cell1=row.insertCell(0);
+    var t1=document.createElement("input");
+        t1.id = "txtName"+index;
+        t1.name = "way";
+        cell1.appendChild(t1);
+        var cell2=row.insertCell(1);
+    index++;
+}
+
+google.maps.event.addDomListener(window, 'load', initialize);
+
+</script>
+   
+
+  </head>
+  <body>
+    <div id="map-canvas" style="float:right;width:70%;height:100%"></div>
+    <div id="control_panel" style="float:left;width:30%;text-align:left;padding-top:20px">
+    <div style="margin:20px;border-width:2px;">
+    <b>Start:</b><br>
+    <input type="text" id="start">
+    <br><br>
+    <b>Waypoints:</b> <br>
+    <table id="myTable">
+    <tbody>
+        <tr>
+            <td><input type="text" name="way" id="txtName" value=""/></td>
+            <td><input type="button" id="btnAdd" class="button-add" onClick="insertRow()" value="Add"></input></td>
+        </tr>
+    </tbody>
+    </table>
+    <br><br>
+    <b>End:</b><br>
+    <input type="text" id="end">
+    <br><br>
+      <input type="submit" onclick="calcRoute();">
+    </div>
+    <div id="directionsPanel" style="float:left">
+    <p>Total Distance: <span id="total"></span></p>
+    </div>
+  </body>
+</html>
