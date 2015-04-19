@@ -4,6 +4,9 @@
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <title>PlanMeARoadTrip!</title>
+    <link rel="stylesheet" href="foundation.css" />
+    <link rel="stylesheet" href="normalize.css" />
+    <link rel="stylesheet" href="main.css" />
     <style type="text/css">
       html, body, #map-canvas {
         height: 100%;
@@ -238,11 +241,12 @@ google.maps.event.addDomListener(window, 'load', initialize);
   <body>
     <div id="map-canvas" style="float:right;width:70%;height:100%"></div>
     <div id="control_panel" style="float:left;width:30%;text-align:left;padding-top:20px">
-    <div style="margin:20px;border-width:2px;">
-    <b>Start:</b><br>
+    <div style="margin:10px;border-width:2px;">
+      <div class ="row">  
+        <div class ="panel">  
+          <b>Start:</b>
     <input type="text" id="start">
-    <br><br>
-    <b>Waypoints:</b> <br>
+    <b>Waypoints:</b> 
     <table id="myTable">
     <tbody>
         <tr>
@@ -251,14 +255,14 @@ google.maps.event.addDomListener(window, 'load', initialize);
         </tr>
     </tbody>
     </table>
-    <br><br>
-    <b>End:</b><br>
+    <b>End:</b>
     <input type="text" id="end">
-    <br><br>
       <input type="submit" onclick="calcRoute();">
-    </div>
-    <div id="directionsPanel" style="float:left">
     <p>Total Distance: <span id="total"></span></p>
-    </div>
+    <div id="directionsPanel" style="float:left">
+  </div>
+  <p>- </p>
+  </div>
+</div>
   </body>
 </html>
